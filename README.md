@@ -17,3 +17,14 @@
 ### **2017/9/29 用户程序安装  by yzh** 
 - 完成ROS系统傻瓜式安装程序（尚未上传）
 - 按照类似的方法，继续Hokuyo和IMU的node的安装与配置
+
+### **2017/10/25 在turtle上成功运行 by zl**
+- 编写hukuyo.urdf.xacro，kuboki_hexagens_hokuyo.
+- 配置文件修改 hokuyo_xsens.launch, turtlebot_xsens.lua, turtlebot_demo.rviz
+- 总结文档完成，移步 https://zldodo.github.io/2017/11/09/07-SLAM-Summary/
+
+### **2017/11/26 下阶段安排 by zl**
+- 振翮继续完成软件封装的工作,调试.sh文件
+- 封装硬件，制作一个SLAM硬件模块，包含Lidar,Imu和Raspi
+- 针对该模块，修改之前的配置参数
+- 完成新模块的调试工作，录制视频。
