@@ -32,7 +32,7 @@ sudo insmod ./xsens_mt.ko
 ## 编译gps_common，xsens_driver，custom_msgs
 这里的编译命令需要注意下，如果使用`catkin_make_isolated –install –use-ninja`,是对/src目录下的所有文件进行编译，貌似会出错。如果报错的话，可以分别对每个Package分别编译：
 ```js
-catkin_make_isolated --pkg gas_common --install –use-ninja
+catkin_make_isolated --pkg gps_common --install –use-ninja
 catkin_make_isolated --pkg xsens_driver --install –use-ninja
 catkin_make_isolated --pkg custom_msgs --install –use-ninja
 ```
