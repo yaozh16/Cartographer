@@ -1,0 +1,8 @@
+prefix=/home/dodo/catkin_ws/devel_isolated/custom_msgs
+
+Name: custom_msgs
+Description: Description of custom_msgs
+Version: 2.0.2
+Cflags: -I/home/dodo/catkin_ws/devel_isolated/custom_msgs/include
+Libs: -L/home/dodo/catkin_ws/devel_isolated/custom_msgs/lib 
+Requires: rospy roscpp std_msgs sensor_msgs message_generation message_runtime

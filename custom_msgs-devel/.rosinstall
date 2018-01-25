@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/dodo/catkin_ws/devel_isolated/custom_msgs/setup.sh
