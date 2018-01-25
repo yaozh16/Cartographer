@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/dodo/catkin_ws/install_isolated/setup.sh
