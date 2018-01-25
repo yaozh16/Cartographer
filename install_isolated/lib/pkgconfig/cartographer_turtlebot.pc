@@ -1,0 +1,8 @@
+prefix=/home/dodo/catkin_ws/install_isolated
+
+Name: cartographer_turtlebot
+Description: Description of cartographer_turtlebot
+Version: 0.2.0
+Cflags: 
+Libs: -L/home/dodo/catkin_ws/install_isolated/lib 
+Requires: message_runtime cartographer_ros roscpp roslib sensor_msgs xsens_driver gps_common custom_msgs

@@ -1,0 +1,8 @@
+prefix=/home/dodo/catkin_ws/install_isolated
+
+Name: xsens_driver
+Description: Description of xsens_driver
+Version: 2.1.0
+Cflags: 
+Libs: -L/home/dodo/catkin_ws/install_isolated/lib 
+Requires: rospy std_msgs tf sensor_msgs geometry_msgs diagnostic_msgs

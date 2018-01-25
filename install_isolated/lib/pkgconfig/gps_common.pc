@@ -1,0 +1,8 @@
+prefix=/home/dodo/catkin_ws/install_isolated
+
+Name: gps_common
+Description: Description of gps_common
+Version: 0.1.9
+Cflags: -I/home/dodo/catkin_ws/install_isolated/include
+Libs: -L/home/dodo/catkin_ws/install_isolated/lib 
+Requires: message_runtime message_filters nav_msgs roscpp sensor_msgs std_msgs rospy
