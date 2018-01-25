@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<robot name="sensor_xsens" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find turtlebot_description)/urdf/common_properties.urdf.xacro"/>
+<!-- XSENS IMU -->    
+  <xacro:macro name="sensor_xsens" params="parent">     
+	  <link name="imu_link">
+	    <visual>
+	      <origin xyz="0 0 0.01"/>
+	      <geometry>
+	        <box size="0.06 0.04 0.02" />
+	      </geometry>
+	      <material name="orange" />
+	    </visual>
+        <inertial>    
+	      <mass value="0.000001" />    
+	      <origin xyz="0 0 0" />    
+	      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"    
+	          iyy="0.0001" iyz="0.0"    
+	          izz="0.0001" />    
+      	</inertial>  
+	  </link>
+
+	  <joint name="imu_link_joint" type="fixed">
+	    <parent link="${parent}"/>
+	    <child link="imu_link" />
+	    <origin xyz="0 0 0.3966"/>
+	  </joint>
+
+	  <!-- Set up laser gazebo details -->    
+      <turtlebot_sim_2dsensor/>  
+  </xacro:macro> 
+</robot>  
