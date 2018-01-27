@@ -7,9 +7,9 @@ if not os.geteuid() == 0:
 
 print("""\033[1;36m
 ┌══════════════════════════════════════════════════════════════┐
-█                                                              █
-█                  Cartographer Installer                      █
-█                                                              █
+|                                                              |
+|                  Cartographer Installer                      |
+|                                                              |
 └══════════════════════════════════════════════════════════════┘     \033[0m""")
 def install():
     def ModifyCerePath(path):
@@ -62,6 +62,8 @@ def install():
     os.system("catkin_make")
     os.system("source devel/setup.bash")
     os.system("rospack profile")
+
+
     print("\033[1;34m安装完毕\033[0m")
     comm=raw_input("\033[1;32m是否安装测试包？\033[0m>>yes/no:")
     if comm=="yes":
