@@ -1,17 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import Tkinter
 from Tkinter import *
 from time import  *
 import os
 import re
-import sys
 
-from PIL import Image,ImageTk
-import virtShell
 import threading
-import multiprocessing
 
 
 
@@ -59,7 +54,7 @@ class CartoGUI(object):
         pass
     def setPath(self,n):
         FDlg(self.entry_texts[n])
-    def runCommandBack(self, command):
+    def runCommandBackground(self, command):
         def threadCommand():
             os.system("echo '#!/bin/bash'> _virtShell_.sh")
             os.system("echo 'source /opt/ros/kinetic/setup.bash'>> _virtShell_.sh")
@@ -71,14 +66,16 @@ class CartoGUI(object):
         NewT.start()
     # start up roscore
     def roscore(self):
-        self.runCommandBack("roscore")
+        self.runCommandBackground("roscore")
+    # roslaunch the script
     def roslaunch(self,command=None):
         global roslaunch_command
         if(command!=None):
             roslaunch_command=command
         else:
             roslaunch_command='roslaunch '+self.entry_texts[2].get()+" "+self.entry_texts[3].get()+' bag_filename:='+self.entry_texts[1].get()
-        self.runCommandBack(roslaunch_command)
+        self.runCommandBackground(roslaunch_command)
+    # save the map
     def rosmapSaver(self):
         dir=self.entry_texts[4].get()
         if not os.path.isdir(dir):
@@ -92,11 +89,10 @@ class CartoGUI(object):
             else:
                 break
 
-        threading.Thread(target=self.runCommandBack("rosrun map_server map_saver -f " + os.path.join(self.entry_texts[4].get(), str(c)))).start()
+        threading.Thread(target=self.runCommandBackground("rosrun map_server map_saver -f " + os.path.join(self.entry_texts[4].get(), str(c)))).start()
+    # start the GUI
     def start(self):
         self.root.mainloop()
-    def config(self):
-        pass
 class FDlg(object):
     def __init__(self,text):
         self.text=text
