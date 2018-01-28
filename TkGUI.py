@@ -8,8 +8,6 @@ import re
 
 import threading
 
-
-
 class CartoGUI(object):
     def __init__(self):
         self.root= Tk()
@@ -47,6 +45,10 @@ class CartoGUI(object):
             add_Entry(3,"launch file","demo_backpack_2d.launch",lambda:self.setPath(3))
             add_Entry(4,"map save directory",os.getcwd(),lambda:self.setPath(4))
         init_Entry()
+
+        self.infotext=StringVar(self.root)
+        self.info=Label(self.root,textvariable=self.infotext,fg="white",wraplength=800,width=80,justify="left")
+        self.info.pack()
     def __del__(self):
         os.system("ps aux|grep ros|awk '{print $2}'|xargs kill -9")
     def setPackage(self,n):
@@ -54,15 +56,27 @@ class CartoGUI(object):
         pass
     def setPath(self,n):
         FDlg(self.entry_texts[n])
+    def setMessage(self,msg,color="black"):
+        self.infotext.set(msg)
+        self.info.config(fg=color)
+        self.root.update()
     def runCommandBackground(self, command):
+        if not os.path.exists(self.entry_texts[0].get()+"/install_isolated/setup.sh"):
+            self.setMessage("catkin workspace error or cartographer not installed","red")
+            return
         def threadCommand():
-            os.system("echo '#!/bin/bash'> _virtShell_.sh")
-            os.system("echo 'source /opt/ros/kinetic/setup.bash'>> _virtShell_.sh")
-            os.system("echo 'source /home/yaozh16/Project/ROS/catkin_ws/install_isolated/setup.sh'>> _virtShell_.sh")
-            os.system("echo "+command+">>_virtShell_.sh")
-            os.system("chmod a+x ./_virtShell_.sh")
-            os.system("./_virtShell_.sh &")
+            try:
+                os.system("echo '#!/bin/bash'> _virtShell_.sh")
+                os.system("echo 'source /opt/ros/kinetic/setup.bash'>> _virtShell_.sh")
+                os.system("echo 'source "+self.entry_texts[0].get()+"/install_isolated/setup.sh'>> _virtShell_.sh")
+                os.system("echo "+command+">>_virtShell_.sh")
+                os.system("chmod a+x ./_virtShell_.sh")
+                os.system("./_virtShell_.sh &")
+            except:
+                print "Error:catkin work space error or cartographer not installed successfully"
+                self.setMessage("error:"+command,"red")
         NewT=threading.Thread(target=threadCommand())
+        self.setMessage("run command:"+command,"green")
         NewT.start()
     # start up roscore
     def roscore(self):
