@@ -17,22 +17,36 @@ PackageAbsolutePath="/home/yaozh16/Project/ROS/catkin_ws/"
 
 class CartoGUI(object):
     def __init__(self):
-        def init_config():
-            self.state_roscore=0
-            self.state_display=0
-            self.state_launch=None
-        init_config()
         self.root=Tkinter.Tk()
         def init_ToolBar():
-            self.frm_toolBar=Tkinter.Frame(self.root)
-            self.bttn_roscore = Tkinter.Button(self.frm_toolBar,  width=20,  text="roscore",command=self.roscore)
-            self.bttn_roslaunch = Tkinter.Button(self.frm_toolBar,width=20, text="roslaunch",command=self.roslaunch)
-            self.bttn_rosmapSaver = Tkinter.Button(self.frm_toolBar,width=20, text="rosmapSaver",command=self.rosmapSaver)
+            self.frm_toolBar=Tkinter.Frame()
+            self.bttn_roscore = Tkinter.Button(self.frm_toolBar,  width=30,  text="roscore",command=self.roscore)
+            self.bttn_roslaunch = Tkinter.Button(self.frm_toolBar,width=30, text="roslaunch",command=self.roslaunch)
+            self.bttn_rosmapSaver = Tkinter.Button(self.frm_toolBar,width=30, text="rosmapSaver",command=self.rosmapSaver)
             self.bttn_roscore.pack(side=Tkinter.LEFT)
             self.bttn_roslaunch.pack(side=Tkinter.LEFT)
             self.bttn_rosmapSaver.pack(side=Tkinter.LEFT)
             self.frm_toolBar.pack()
         init_ToolBar()
+
+        def init_Entry():
+            def add_Entry(rank,labelText):
+                self.frm_entry.append(Tkinter.Frame(self.root))
+                self.labels.append(((Tkinter.Label(self.frm_entry[rank],width=20, text=labelText)),rank))
+                self.entries.append(Tkinter.Entry(self.frm_entry[rank],width=65))
+                self.buttons.append(Tkinter.Button(self.frm_entry[rank],width=10 , text="select"))
+                self.labels[rank][0].pack(side=Tkinter.LEFT)
+                self.entries[rank].pack(side=Tkinter.LEFT)
+                self.buttons[rank].pack(side=Tkinter.LEFT)
+                self.frm_entry[rank].pack()
+            self.frm_entry=list()
+            self.labels=list()
+            self.entries=list()
+            self.buttons=list()
+            add_Entry(0,"catkin work space")
+            add_Entry(1,"bag")
+            add_Entry(2,"3")
+        init_Entry()
     def runCommand(self,command):
         def threadCommand():
             os.chdir("/home/yaozh16/Project/ROS/PyTk")
@@ -41,14 +55,12 @@ class CartoGUI(object):
             os.system("echo 'source /home/yaozh16/Project/ROS/catkin_ws/install_isolated/setup.sh'>> _virtShell_.sh")
             os.system("echo "+command+">>_virtShell_.sh")
             os.system("chmod a+x ./_virtShell_.sh")
-            os.system("./_virtShell_.sh")
-        NewT=multiprocessing.Process(target=threadCommand())
+            os.system("./_virtShell_.sh &")
+        NewT=threading.Thread(target=threadCommand())
         NewT.start()
     # start up roscore
     def roscore(self):
-        self.state_roscore=1-self.state_roscore
-        # self.runCommand("roscore")
-
+        self.runCommand("roscore")
     def roslaunch(self,command=None):
         global roslaunch_command
         if(command!=None):
@@ -56,25 +68,7 @@ class CartoGUI(object):
         else:
             # roslaunch_command='roslaunch cartographer_ros demo_backpack_2d.launch bag_filename:=/home/yaozh16/Project/ROS/data/cartographer_paper_deutsches_museum.bag'
             roslaunch_command='roslaunch cartographer_turtlebot turtlebot_urg_lidar_2d.launch'
-        def display_Thread():
-            global roslaunch_command
-            os.chdir(PackageAbsolutePath)
-            os.system("echo '#!/bin/bash'> __startup__.sh")
-            os.system("echo 'cd /home/yaozh16/Project/ROS/catkin_ws'>>__startup__.sh")
-            os.system("echo 'source install_isolated/setup.sh'>>__startup__.sh")
-            os.system(
-                "echo "+roslaunch_command+">>__startup__.sh")
-            os.system("chmod a+x __startup__.sh")
-            os.system("./__startup__.sh")
-
-        self.display_thread = threading.Thread(target=display_Thread, name='DisplayThread')
-        self.display_thread.setDaemon(True)
-        if self.state_roscore==1:
-            print "1"
-            self.display_thread.start()
-        else:
-            print "2"
-
+        self.runCommand(roslaunch_command)
     def rosmapSaver(self):
         self.runCommand("rosrun map_server map_saver -f ~/Project/ROS/T")
         pass
@@ -82,6 +76,11 @@ class CartoGUI(object):
         self.root.mainloop()
     def config(self):
         pass
-
+class FDS(object):
+    def __init__(self):
+        self.top=Tkinter.Tk()
+        self.label=Tkinter.Label(self.top,text="File")
+        self.label.pack()
+        
 gui=CartoGUI()
 gui.start()
