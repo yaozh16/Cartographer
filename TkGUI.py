@@ -5,6 +5,7 @@ import Tkinter
 from Tkinter import *
 from time import  *
 import os
+import re
 import sys
 
 from PIL import Image,ImageTk
@@ -29,13 +30,13 @@ class CartoGUI(object):
         init_ToolBar()
 
         def init_Entry():
-            def add_Entry(rank,labelText,initEntry=""):
+            def add_Entry(rank,labelText,initEntry,buttonCommand):
                 self.frm_entry.append( Frame(self.root))
                 self.labels.append((( Label(self.frm_entry[rank],width=20, text=labelText)),rank))
                 self.entry_texts.append(StringVar(self.root))
                 self.entry_texts[rank].set(initEntry)
                 self.entries.append( Entry(self.frm_entry[rank],width=65,textvariable=self.entry_texts[rank]))
-                self.buttons.append( Button(self.frm_entry[rank],width=10 , text="select",command=lambda:self.setPath(rank)))
+                self.buttons.append( Button(self.frm_entry[rank],width=10 , text="select",command=buttonCommand))
                 self.labels[rank][0].pack(side= LEFT)
                 self.entries[rank].pack(side= LEFT)
                 self.buttons[rank].pack(side= LEFT)
@@ -45,16 +46,20 @@ class CartoGUI(object):
             self.entry_texts=list()
             self.entries=list()
             self.buttons=list()
-            add_Entry(0,"catkin work space","/home/yaozh16/Project/ROS/catkin_ws")
-            add_Entry(1,"bag","/home/yaozh16/Project/ROS/data/cartographer_paper_deutsches_museum.bag")
-            add_Entry(2,"package","cartographer_ros")
-            add_Entry(3,"launch file","demo_backpack_2d.launch")
-            add_Entry(4,"map save directory",os.getcwd())
+            add_Entry(0,"catkin work space","/home/yaozh16/Project/ROS/catkin_ws",lambda:self.setPath(0))
+            add_Entry(1,"bag","/home/yaozh16/Project/ROS/data/cartographer_paper_deutsches_museum.bag",lambda:self.setPath(1))
+            add_Entry(2,"package","cartographer_ros",lambda:self.setPackage(2))
+            add_Entry(3,"launch file","demo_backpack_2d.launch",lambda:self.setPath(3))
+            add_Entry(4,"map save directory",os.getcwd(),lambda:self.setPath(4))
         init_Entry()
-
+    def __del__(self):
+        os.system("ps aux|grep ros|awk '{print $2}'|xargs kill -9")
+    def setPackage(self,n):
+        PkgDlg(self.entry_texts[n])
+        pass
     def setPath(self,n):
         FDlg(self.entry_texts[n])
-    def runCommand(self,command):
+    def runCommandBack(self, command):
         def threadCommand():
             os.system("echo '#!/bin/bash'> _virtShell_.sh")
             os.system("echo 'source /opt/ros/kinetic/setup.bash'>> _virtShell_.sh")
@@ -66,14 +71,14 @@ class CartoGUI(object):
         NewT.start()
     # start up roscore
     def roscore(self):
-        self.runCommand("roscore")
+        self.runCommandBack("roscore")
     def roslaunch(self,command=None):
         global roslaunch_command
         if(command!=None):
             roslaunch_command=command
         else:
             roslaunch_command='roslaunch '+self.entry_texts[2].get()+" "+self.entry_texts[3].get()+' bag_filename:='+self.entry_texts[1].get()
-        self.runCommand(roslaunch_command)
+        self.runCommandBack(roslaunch_command)
     def rosmapSaver(self):
         dir=self.entry_texts[4].get()
         if not os.path.isdir(dir):
@@ -87,7 +92,7 @@ class CartoGUI(object):
             else:
                 break
 
-        threading.Thread(target=self.runCommand("rosrun map_server map_saver -f "+os.path.join(self.entry_texts[4].get(),str(c)))).start()
+        threading.Thread(target=self.runCommandBack("rosrun map_server map_saver -f " + os.path.join(self.entry_texts[4].get(), str(c)))).start()
     def start(self):
         self.root.mainloop()
     def config(self):
@@ -146,7 +151,7 @@ class FDlg(object):
             self.cwd.set(self.finalRet)
             self.text.set(self.finalRet)
             self.subroot.update()
-    def finish(self):
+    def finish(self,ev=None):
         self.subroot.destroy()
         self.finished=True
     def clrDir(self,ev=None):
@@ -209,7 +214,81 @@ class FDlg(object):
         for each in dirlist:
             self.dirs.insert(END,each)
         self.dirs.config(selectbackground="LightSkyBlue")
+class PkgDlg(object):
+    def __init__(self,text):
+        os.system("echo '#!/bin/bash'> _virtShell_.sh")
+        os.system("echo 'source /opt/ros/kinetic/setup.bash'>> _virtShell_.sh")
+        os.system("echo 'source /home/yaozh16/Project/ROS/catkin_ws/install_isolated/setup.sh'>> _virtShell_.sh")
+        os.system("echo rospack list>>_virtShell_.sh")
+        os.system("chmod a+x ./_virtShell_.sh")
+        tempkglist=os.popen("./_virtShell_.sh").readlines()
+        self.pkglist = list()
+        pa=re.compile("([\S])+ [\S]+")
+        for each in tempkglist:
+            self.pkglist.append(each.split(' ')[0])
 
+        self.text=text
+
+        self.subroot= Tk()
+        self.label= Label(self.subroot, text="Package")
+        self.label.pack()
+        self.filter_pattern= StringVar(self.subroot)
+
+        self.dirl=Label(self.subroot, fg="blue", font=("Helvetica", 12, 'bold'))
+        self.dirl.pack()
+
+        # 列表
+        self.dirfm=Frame(self.subroot)
+        self.dirsb=Scrollbar(self.dirfm)
+        self.dirsb.pack(side=RIGHT,fill=Y)
+        self.dirs=Listbox(self.dirfm,height=15,width=50,yscrollcommand=self.dirsb.set)
+        self.dirs.bind('<Double-1>',self.finish)
+        self.dirs.bind('<<ListboxSelect>>',self.setClickRet)
+        self.dirsb.config(command=self.dirs.yview)
+        self.dirs.pack(side=LEFT,fill=BOTH)
+        self.dirfm.pack()
+
+        # 输入框
+        self.dirn= Entry(self.subroot, width=50, textvariable=self.filter_pattern)
+        self.dirn.bind('<Key>',self.filter)
+        self.dirn.pack()
+
+        self.bfm=Frame(self.subroot)
+        self.clr=Button(self.bfm,text="Clear",command=(lambda :{self.filter_pattern.set(''),self.filter()}),activeforeground="white",activebackground="blue")
+        self.ls=Button(self.bfm,text="Filter",command=self.filter,activeforeground="white",activebackground="green")
+        self.quit=Button(self.bfm, text="Confirm", command=self.finish, activeforeground="white", activebackground="red")
+        self.clr.pack(side=LEFT)
+        self.ls.pack(side=LEFT)
+        self.quit.pack(side=LEFT)
+        self.bfm.pack()
+        initDir=self.text.get()
+        self.filter_pattern.set(initDir)
+        self.finalRet=initDir
+        self.filter_pattern.set(self.finalRet)
+        self.filter()
+        self.text.set(self.finalRet)
+        self.subroot.update()
+    def setClickRet(self,ev=None):
+        if self.dirs.curselection()==():
+            return
+        tpkg=self.dirs.get(self.dirs.curselection())
+        if(self.pkglist.__contains__(tpkg)):
+            self.finalRet=tpkg
+            self.filter_pattern.set(self.finalRet)
+            self.text.set(self.finalRet)
+            self.subroot.update()
+    def finish(self,ev=None):
+        self.subroot.destroy()
+        self.finished=True
+    def filter(self,ev=None):
+        print 1
+        pattern=self.filter_pattern.get()
+        self.dirs.delete(0, END)
+        pa=re.compile(pattern)
+        for each in  self.pkglist:
+            if pa.search(each):
+                self.dirs.insert(END, each)
+        self.dirs.config(selectbackground="LightSkyBlue")
 gui=CartoGUI()
 gui.start()
 
